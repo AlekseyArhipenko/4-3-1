@@ -20,8 +20,6 @@ public class NewCardOrderTest {
     private WebDriver driver;
 
 
-
-
     @BeforeAll
     public static void setUpAll() {
         WebDriverManager.chromedriver().setup();
@@ -59,4 +57,17 @@ public class NewCardOrderTest {
         String expected = "Ваша заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время.";
         assertEquals(expected, actual);
     }
+
+    @Test
+    public void shouldSendFormWithoutName() {
+        driver.get("http://localhost:9999/");
+        //driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
+        driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+79261234567");
+        driver.findElement(By.className("checkbox__box")).click();
+        driver.findElement(By.tagName("button")).click();
+        String actual = driver.findElement(By.cssSelector("[class='input__sub']")).getText().trim();
+        String expected = "Поле обязательно для заполнения";
+        assertEquals(expected, actual);
+    }
+
 }
