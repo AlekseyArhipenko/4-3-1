@@ -70,4 +70,15 @@ public class NewCardOrderTest {
         assertEquals(expected, actual);
     }
 
+    @Test
+    public void shouldSendFormWithBadPhone() {
+        driver.get("http://localhost:9999/");
+        driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
+        driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+7926123456774");
+        driver.findElement(By.className("checkbox__box")).click();
+        driver.findElement(By.tagName("button")).click();
+        String actual = driver.findElement(By.cssSelector(".input_type_tel .input__sub")).getText().trim();
+        String expected = "Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.";
+        assertEquals(expected, actual);
+    }
 }
