@@ -7,11 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -23,7 +20,6 @@ public class NewCardOrderTest {
     @BeforeAll
     public static void setUpAll() {
         WebDriverManager.chromedriver().setup();
-        //System.setProperty("webdriver.chrome.driver", "driver/win/chromedriver.exe");
 
     }
 
@@ -34,6 +30,7 @@ public class NewCardOrderTest {
         options.addArguments("--no-sandbox");
         options.addArguments("--headless");
         driver = new ChromeDriver(options);
+        driver.get("http://localhost:9999");
 
     }
 
@@ -45,12 +42,8 @@ public class NewCardOrderTest {
 
     @Test
     public void shouldSendForm() {
-        driver.get("http://localhost:9999/");
         driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
         driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+79261234567");
-        //List<WebElement> textFields = driver.findElements(By.className("input__control"));
-        //textFields.get(0).sendKeys("Юлия Архипенко");
-        //textFields.get(1).sendKeys("+79261234567");
         driver.findElement(By.className("checkbox__box")).click();
         driver.findElement(By.tagName("button")).click();
         String actual = driver.findElement(By.cssSelector("[data-test-id='order-success']")).getText().trim();
@@ -60,25 +53,53 @@ public class NewCardOrderTest {
 
     @Test
     public void shouldSendFormWithoutName() {
-        driver.get("http://localhost:9999/");
-        //driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
         driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+79261234567");
         driver.findElement(By.className("checkbox__box")).click();
         driver.findElement(By.tagName("button")).click();
-        String actual = driver.findElement(By.cssSelector("[class='input__sub']")).getText().trim();
+        String actual = driver.findElement(By.cssSelector("[data-test-id='name'].input_invalid .input__sub")).getText().trim();
         String expected = "Поле обязательно для заполнения";
         assertEquals(expected, actual);
     }
 
     @Test
     public void shouldSendFormWithBadPhone() {
-        driver.get("http://localhost:9999/");
         driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
         driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+7926123456774");
         driver.findElement(By.className("checkbox__box")).click();
         driver.findElement(By.tagName("button")).click();
-        String actual = driver.findElement(By.cssSelector(".input_type_tel .input__sub")).getText().trim();
+        String actual = driver.findElement(By.cssSelector("[data-test-id='phone'].input_invalid .input__sub")).getText().trim();
         String expected = "Телефон указан неверно. Должно быть 11 цифр, например, +79012345678.";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldSendFormWithBadName() {
+        driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия!");
+        driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+79261234567");
+        driver.findElement(By.className("checkbox__box")).click();
+        driver.findElement(By.tagName("button")).click();
+        String actual = driver.findElement(By.cssSelector("[data-test-id='name'].input_invalid .input__sub")).getText().trim();
+        String expected = "Имя и Фамилия указаные неверно. Допустимы только русские буквы, пробелы и дефисы.";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldSendFormWithoutPhone() {
+        driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
+        driver.findElement(By.className("checkbox__box")).click();
+        driver.findElement(By.tagName("button")).click();
+        String actual = driver.findElement(By.cssSelector("[data-test-id='phone'].input_invalid .input__sub")).getText().trim();
+        String expected = "Поле обязательно для заполнения";
+        assertEquals(expected, actual);
+    }
+
+    @Test
+    public void shouldSendFormWithoutCheckbox() {
+        driver.findElement(By.cssSelector("[type='text']")).sendKeys("Юлия");
+        driver.findElement(By.cssSelector("[type='tel']")).sendKeys("+79261234567");
+        driver.findElement(By.tagName("button")).click();
+        String actual = driver.findElement(By.cssSelector("[data-test-id='agreement'].input_invalid .checkbox__text")).getText().trim();
+        String expected = "Я соглашаюсь с условиями обработки и использования моих персональных данных и разрешаю сделать запрос в бюро кредитных историй";
         assertEquals(expected, actual);
     }
 }
